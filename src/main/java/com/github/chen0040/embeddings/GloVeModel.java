@@ -55,8 +55,42 @@ public class GloVeModel {
         return null;
     }
 
+    public float[] encodeDocument(String sentence) {
+        sentence = filter(sentence);
+        String[] words = sentence.split(" ");
+
+        float[] vec = new float[dimension];
+        for(String word: words) {
+            String w = word.trim();
+            if(w.equals("")){
+                continue;
+            }
+            float[] word2vec = encodeWord(w);
+            if(word2vec == null) continue;
+            for(int i=0; i < dimension; ++i){
+                vec[i] += word2vec[i];
+            }
+        }
+
+        return vec;
+
+    }
+
+    private String filter(String sent) {
+        sent = sent.toLowerCase();
+        String[] punctuations = new String[] {",", ".", ";", ":", "?", "!", "\"", "'"};
+        for(String punt : punctuations) {
+            sent = sent.replace(punt, " " + punt);
+        }
+        return sent;
+    }
+
     public int size() {
         return word2em.size();
+    }
+
+    public int getWordVecDimension() {
+        return dimension;
     }
 
     public Map<String, float[]> load(String dirPath, int dimension){
@@ -66,10 +100,14 @@ public class GloVeModel {
         String filePath = dirPath + "/" + sourceFile100;
         File file = new File(filePath);
         if(!file.exists()){
+
             String zipFilePath = dirPath + "/glove.6B.zip";
             if(!new File(zipFilePath).exists()) {
+                logger.info("{} not found on local machine, downloading it from {}", zipFilePath, url);
                 if (!HttpClient.downloadFile(url, zipFilePath)) {
                     return word2em;
+                } else {
+                    logger.info("{} is downloaded", zipFilePath);
                 }
             }
 
@@ -77,6 +115,8 @@ public class GloVeModel {
                 return word2em;
             }
         }
+
+        logger.info("loading {} into word2em", filePath);
 
         try(BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath))))){
             String line;
@@ -103,6 +143,7 @@ public class GloVeModel {
     }
 
     private boolean unZip(String zipFilePath, String dirPath) {
+        logger.info("unzipping {} to {}", zipFilePath, dirPath);
         try {
             ZipFile zipFile = new ZipFile(zipFilePath);
             zipFile.extractAll(dirPath);
@@ -112,5 +153,24 @@ public class GloVeModel {
             logger.error("Failed to unzip " + zipFilePath, e);
             return false;
         }
+    }
+
+    public double distance(String word1, String word2) {
+        float[] vec1 = encodeWord(word1);
+        float[] vec2 = encodeWord(word2);
+
+        if(vec1 == null || vec2 == null) {
+            return -1f;
+        }
+
+        float result = 0;
+        for(int i=0; i < dimension; ++i) {
+            float v1 = vec1[i];
+            float v2 = vec2[i];
+
+            result += (v1 - v2) * (v1 - v2);
+        }
+
+        return Math.sqrt(result);
     }
 }
