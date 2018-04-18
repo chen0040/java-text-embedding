@@ -4,6 +4,18 @@ Word embedding in Java
 
 The current project provides GloVe word embedding that developer can directly use within their project.
 
+# Install
+
+Add the following dependency to your POM file:
+
+```xml
+<dependency>
+  <groupId>com.github.chen0040</groupId>
+  <artifactId>java-text-embedding</artifactId>
+  <version>1.0.1</version>
+</dependency>
+```
+
 # Usage
 
 The [sample codes](src/main/java/com/github/chen0040/embeddings/GloVeModelDemo.java) below shows how to use
