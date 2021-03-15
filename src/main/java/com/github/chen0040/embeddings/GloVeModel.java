@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class GloVeModel {
 
-    private static final String url = "http://nlp.stanford.edu/data/glove.6B.zip";
+    private static final String url = "https://nlp.stanford.edu/data/glove.6B.zip";
     private Map<String, float[]> word2em = new HashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(GloVeModel.class);
     private int dimension = -1;
